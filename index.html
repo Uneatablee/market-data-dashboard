@@ -285,6 +285,53 @@ p, li, .subtitle, .chart-summary, th, td {
 .bleed-text-side p {
     margin-bottom: 25px;
 }
+/* Schedule Layout */
+.schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.schedule-item {
+    background-color: #1E293B;
+    border-radius: 16px;
+    padding: 25px 35px;
+    border-left: 6px solid #00FF7F;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.schedule-date {
+    color: #00FF7F;
+    font-family: 'Urbanist', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.schedule-date span {
+    color: #94A3B8;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    margin-top: 5px;
+}
+
+.schedule-desc {
+    color: #CBD5E1;
+    font-size: 18px;
+    margin: 0;
+    line-height: 1.5;
+}
     </style>
 </head>
 <body>
