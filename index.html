@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Data Dashboard - Android App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+/* 1. THE SETUP */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0F172A; /* Dark Slate Background */
+    display: grid;
+    gap: 30px;
+    grid-template-columns: 1fr;
+    margin: 0;
+    min-height: 100vh;
+    padding: 30px 0;
+    place-items: center;
+}
+
+.slide-container {
+    align-items: center;
+    background-color: #121212; /* Very Dark Grey Background */
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inter', sans-serif;
+    height: 720px;
+    justify-content: center;
+    overflow: hidden;
+    padding: 60px;
+    position: relative;
+    width: 1280px;
+}
+
+/* 1.1 BACKGROUND STYLING */
+.slide-container::before {
+    background: radial-gradient(circle at top right, rgba(0, 255, 127, 0.05), transparent 40%);
+    content: '';
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 0;
+}
+
+.slide-container > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* 2. CONSISTENT TYPOGRAPHY */
+h1, h2, h3, h4 {
+    color: #F8FAFC; /* Off-White for Headings */
+    font-family: 'Urbanist', sans-serif;
+    font-weight: 700;
+    margin: 0;
+}
+
+.accent-text {
+    color: #00FF7F; /* Spring Green Accent */
+}
+
+p, li, .subtitle, .chart-summary, th, td {
+    color: #CBD5E1; /* Light Slate for Body Text */
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+}
+
+/* Consistent Font Sizes */
+.slide-container h1 {
+    font-size: 72px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+}
+
+.slide-container .slide-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 40px;
+    text-align: left;
+    width: 100%;
+    border-bottom: 2px solid rgba(0, 255, 127, 0.2);
+    padding-bottom: 15px;
+}
+
+.slide-container h3 {
+    font-size: 30px;
+    margin-bottom: 15px;
+    color: #F8FAFC;
+}
+
+.slide-container p,
+.slide-container li,
+.slide-container .subtitle {
+    font-size: 20px;
+}
+
+.slide-container .subtitle {
+    font-size: 24px;
+    font-weight: 400;
+    color: #94A3B8;
+    max-width: 900px;
+}
+
+.slide-container .content-area {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+    width: 100%;
+}
+
+/* 3. LAYOUT DEFINITIONS */
+
+/* Title Layout */
+.title-layout {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.title-layout hr {
+    width: 100px;
+    height: 4px;
+    background-color: #00FF7F;
+    border: none;
+    margin: 30px 0;
+    border-radius: 2px;
+}
+
+/* Two Column */
+.two-column {
+    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    width: 100%;
+}
+
+.two-column ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.two-column li {
+    margin-bottom: 20px;
+    padding-left: 35px;
+    position: relative;
+}
+
+.two-column li::before {
+    content: '\f105'; /* FontAwesome angle-right */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: #00FF7F;
+    position: absolute;
+    left: 0;
+    top: 2px;
+    font-size: 20px;
+}
+
+.image-wrapper {
+    border-radius: 16px;
+    height: 400px;
+    max-width: 100%;
+    overflow: hidden;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.image-wrapper img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.two-column .image-wrapper img {
+    object-fit: contain;
+    background-color: #1E293B;
+}
+
+/* Tiled Content */
+.tiled-content {
+    align-items: stretch;
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    width: 100%;
+}
+
+.tile {
+    align-items: flex-start;
+    background-color: #1E293B;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 35px;
+    text-align: left;
+    transition: transform 0.3s ease;
+}
+
+.tile .icon {
+    align-items: center;
+    background-color: rgba(0, 255, 127, 0.1);
+    border-radius: 12px;
+    color: #00FF7F;
+    display: flex;
+    font-size: 32px;
+    height: 70px;
+    justify-content: center;
+    margin-bottom: 25px;
+    width: 70px;
+}
+
+.tile p {
+    font-size: 18px;
+    color: #94A3B8;
+}
+
+/* Bleed Image Right */
+.slide-container.bleed-image-layout {
+    align-items: start;
+    display: grid;
+    gap: 50px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0;
+}
+
+.slide-container.bleed-image-layout > .content-container {
+    padding: 60px 0 60px 60px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.slide-container.bleed-image-layout .slide-title {
+    width: 100%;
+}
+
+.slide-container.bleed-image-layout .content-area {
+    align-items: flex-start;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.slide-container.bleed-image-layout > .image-container {
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+}
+
+.slide-container.bleed-image-layout img.bleed-image-side {
+    display: block;
+    height: 720px;
+    object-fit: cover;
+    object-position: center left;
+    width: 100%;
+    opacity: 0.9;
+}
+
+.bleed-text-side h3 {
+    color: #00FF7F;
+    margin-bottom: 20px;
+}
+
+.bleed-text-side p {
+    margin-bottom: 25px;
+}
+    </style>
+</head>
+<body>
+
+<!-- Slide 1: Title_Slide -->
+<div class="slide-container" id="slide1">
+    <div class="title-layout">
+        <h1>Market Data <span class="accent-text">Dashboard</span></h1>
+        <hr>
+        <p class="subtitle">Prosta aplikacja mobilna do monitorowania cen w czasie rzeczywistym.<br>Tworzona w <strong>Android Studio, Kotlin, MVI oraz Jetpack Compose</strong>.</p>
+    </div>
+</div>
+
+<!-- Slide 2: Image_Right_Text_Left (Cel Projektu) -->
+<div class="slide-container" id="slide2">
+    <h2 class="slide-title">Cel Projektu i Funkcjonalności</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <h3>Założenia Aplikacji</h3>
+                <p style="margin-bottom: 25px;">Projekt skupia się na stworzeniu lekkiego i czytelnego interfejsu do śledzenia rynków finansowych.</p>
+                <ul>
+                    <li><strong>Połączenie z Publicznym API:</strong> Pobieranie danych z darmowych źródeł takich jak Binance API lub Yahoo Finance API.</li>
+                    <li><strong>Aktualne Ceny:</strong> Prezentacja bieżących kursów walorów na głównym ekranie.</li>
+                    <li><strong>Wykresy używając MPAndroidChart:</strong> Zastąpienie prostych wykresów potężną biblioteką, osadzoną w Compose poprzez AndroidView.</li>
+                    <li><strong>Płynność i Reaktywność:</strong> Błyskawiczne odświeżanie danych bez blokowania interfejsu użytkownika.</li>
+                </ul>
+            </div>
+            <div>
+                <div class="image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=800&h=800" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 3: Tiled_Text_With_Icons (Stack Technologiczny) -->
+<div class="slide-container" id="slide3">
+    <h2 class="slide-title">Stos Technologiczny</h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon"><i class="fa-brands fa-android"></i></div>
+                <h3>Kotlin & Jetpack Compose</h3>
+                <p>Nowoczesny, w 100% deklaratywny framework UI połączony z językiem Kotlin, korzystający z Coroutines i Flow dla płynnej asynchroniczności.</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
+                <h3>MPAndroidChart</h3>
+                <p>Zewnętrzna, w pełni wyposażona biblioteka służąca do generowania zaawansowanych i interaktywnych wykresów giełdowych, płynnie zintegrowana z UI.</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-server"></i></div>
+                <h3>OkHttp & WebSockets</h3>
+                <p>Retrofit z OkHttp służy do pobierania statycznych danych historycznych, natomiast protokół WebSockets jest wykorzystywany do stałego nasłuchiwania cen na żywo.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 4: Tiled_Text_With_Icons (Architektura MVI) -->
+<div class="slide-container" id="slide4">
+    <h2 class="slide-title">Architektura <span class="accent-text">MVI</span> (Model-View-Intent)</h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon" style="color: #60A5FA; background-color: rgba(96, 165, 250, 0.1);"><i class="fa-solid fa-cubes"></i></div>
+                <h3 style="color: #60A5FA;">Model (Stan)</h3>
+                <p>Pojedyncze źródło prawdy (Single Source of Truth). Definiuje obecny stan ekranu (np. Loading, Data, Error). Jest niemutowalny i dystrybuowany przez StateFlow.</p>
+            </div>
+            <div class="tile">
+                <div class="icon" style="color: #F472B6; background-color: rgba(244, 114, 182, 0.1);"><i class="fa-solid fa-mobile-screen"></i></div>
+                <h3 style="color: #F472B6;">View (Widok)</h3>
+                <p>Czysty, funkcyjny interfejs w Jetpack Compose. Odbiera obiekty Modelu i po prostu rysuje odpowiedni ekran bez żadnej dodatkowej logiki biznesowej.</p>
+            </div>
+            <div class="tile">
+                <div class="icon" style="color: #FBBF24; background-color: rgba(251, 191, 36, 0.1);"><i class="fa-solid fa-hand-pointer"></i></div>
+                <h3 style="color: #FBBF24;">Intent (Akcja)</h3>
+                <p>Intencja ze strony użytkownika (np. zmiana interwału wykresu) lub systemu, wysyłana z View do ViewModelu w celu przetworzenia i aktualizacji Modelu.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 5: Bleed_Image_Right (Pobieranie Danych API) -->
+<div class="slide-container bleed-image-layout" id="slide5">
+    <div class="content-container">
+        <h2 class="slide-title">Dwa strumienie <span class="accent-text">Danych</span></h2>
+        <div class="content-area">
+            <div class="bleed-text-side">
+                <h3>Dane Historyczne (REST)</h3>
+                <p>OkHttp i Retrofit wykonują proste żądania GET do darmowego API, pobierając np. historie kursu z ostatnich 24 godzin potrzebne do wyrenderowania wykresu MPAndroidChart.</p>
+
+                <h3>Dane Na Żywo (WebSockets)</h3>
+                <p>Aby wykres nie musiał być ręcznie odświeżany co kilka sekund (co jest niewydajne), otwieramy połączenie WSS (np. z Binance). Aplikacja "nasłuchuje" zmian, odświeżając UI dokładnie w momencie rynkowej zmiany ceny.</p>
+            </div>
+        </div>
+    </div>
+    <div class="image-container">
+        <img class="bleed-image-side" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=800&h=1200" alt="">
+    </div>
+</div>
+
+</body>
+</html>
+```
