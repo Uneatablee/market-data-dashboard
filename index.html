@@ -332,6 +332,9 @@ p, li, .subtitle, .chart-summary, th, td {
     margin: 0;
     line-height: 1.5;
 }
+.feature-list-optional li::before {
+    color: #A855F7 !important; /* Purple bullet for optional features */
+}
     </style>
 </head>
 <body>
@@ -436,8 +439,67 @@ p, li, .subtitle, .chart-summary, th, td {
     </div>
 </div>
 
-<!-- Slide 6: Custom Schedule Layout (Harmonogram Projektu) -->
+<!-- Slide 6: Two_Column_Tiled_Text (Kluczowe vs Opcjonalne) -->
 <div class="slide-container" id="slide6">
+    <h2 class="slide-title">Zakres <span class="accent-text">Funkcjonalności</span></h2>
+    <div class="content-area">
+        <div class="two-column">
+            <!-- Funkcjonalności Kluczowe (MVP) -->
+            <div class="tile" style="border-top: 4px solid #00FF7F;">
+                <div class="icon" style="background-color: rgba(0, 255, 127, 0.1); color: #00FF7F; width: 60px; height: 60px; font-size: 24px; margin-bottom: 20px;">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <h3 style="color: #00FF7F; margin-bottom: 20px;">Kluczowe (MVP)</h3>
+                <ul style="margin-top: 10px;">
+                    <li style="margin-bottom: 15px;"><strong>Instrumenty:</strong> Dane dla kryptowalut i ETF w sztywnym zakresie 24h.</li>
+                    <li style="margin-bottom: 15px;"><strong>Wykresy:</strong> Implementacja wykresu linii trendu za pomocą biblioteki zewnętrznej.</li>
+                    <li style="margin-bottom: 15px;"><strong>Integracja API:</strong> Pomyślne pobieranie i mapowanie danych z wybranego endpointu.</li>
+                    <li style="margin-bottom: 15px;"><strong>Interfejs:</strong> Stworzenie kompletnego UI aplikacji przy użyciu Jetpack Compose.</li>
+                </ul>
+            </div>
+
+            <!-- Funkcjonalności Opcjonalne -->
+            <div class="tile" style="border-top: 4px solid #A855F7;">
+                <div class="icon" style="background-color: rgba(168, 85, 247, 0.1); color: #A855F7; width: 60px; height: 60px; font-size: 24px; margin-bottom: 20px;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h3 style="color: #A855F7; margin-bottom: 20px;">Opcjonalne</h3>
+                <ul class="feature-list-optional" style="margin-top: 10px;">
+                    <li style="margin-bottom: 15px;"><strong>Ramy czasowe:</strong> Przełączniki dla innych interwałów i wykresy ukazujące dynamikę wzrostu/spadku.</li>
+                    <li style="margin-bottom: 15px;"><strong>Alerty z limitem:</strong> Ustawienie docelowej ceny zakupu/sprzedaży (instrument podświetla się odpowiednio na zielono lub czerwono).</li>
+                    <li style="margin-bottom: 15px;"><strong>Kalkulator portfela:</strong> Ekran zliczania wartości. Dodanie posiadanej ilości do aplikacji automatycznie przelicza zysk/stratę na bazie zainwestowanej kwoty.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 7: Ryzyka Projektowe -->
+<div class="slide-container" id="slide7">
+    <h2 class="slide-title">Potencjalne Ryzyka <span class="accent-text">Projektowe</span></h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon" style="color: #EF4444; background-color: rgba(239, 68, 68, 0.1);"><i class="fa-regular fa-clock"></i></div>
+                <h3 style="color: #EF4444;">Interwał tylko 24h</h3>
+                <p>Ryzyko trudności z dynamicznym mapowaniem innych ram czasowych. Możliwe, że aplikacja umożliwi wyświetlanie wykresu wyłącznie dla ostatnich 24 godzin dla danego instrumentu.</p>
+            </div>
+            <div class="tile">
+                <div class="icon" style="color: #F97316; background-color: rgba(249, 115, 22, 0.1);"><i class="fa-solid fa-plug-circle-xmark"></i></div>
+                <h3 style="color: #F97316;">Brak Danych Live</h3>
+                <p>Istnieje ryzyko problemów z wdrożeniem i stabilnością połączenia WebSockets. W ramach planu B, aplikacja będzie działać w oparciu o statyczne dane odświeżane przez Retrofit.</p>
+            </div>
+            <div class="tile">
+                <div class="icon" style="color: #EAB308; background-color: rgba(234, 179, 8, 0.1);"><i class="fa-solid fa-coins"></i></div>
+                <h3 style="color: #EAB308;">Dostępność API</h3>
+                <p>Brak stabilnych, darmowych API dla rynków tradycyjnych (ETF, akcje). Początkowo projekt skupi się na kryptowalutach, a inne instrumenty zostaną dodane tylko w miarę możliwości.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 8: Custom Schedule Layout (Harmonogram Projektu) -->
+<div class="slide-container" id="slide8">
     <h2 class="slide-title">Harmonogram Realizacji Projektu</h2>
     <div class="content-area">
         <div class="schedule-list">
