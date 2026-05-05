@@ -1,5 +1,6 @@
 package com.example.market_data_dashboard.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
@@ -25,29 +26,16 @@ class MarketViewModel : ViewModel() {
         when (intent) {
             is MarketIntent.FetchMarketData -> loadMarketData()
             is MarketIntent.RefreshData -> loadMarketData()
-            is MarketIntent.CoinClicked -> fetchCoin()
+            is MarketIntent.ChangeChartInterval -> {
+                _state.value.selectedCoin?.let { symbol ->
+                    fetchCoinHistory(symbol, intent.interval)
+                }
+            }
+            is MarketIntent.CoinClicked -> fetchCoinHistory(intent.symbolString, "24h")
+            is MarketIntent.GoBack -> _state.update { it.copy(selectedCoin = null) }
         }
     }
 
-    //    private fun loadMarketData() {
-//        viewModelScope.launch {
-//            _state.update { currentState ->
-//                currentState.copy(isLoading = true, error = null)
-//            }
-//
-//            delay(1500)
-//
-//            val fakeData = listOf(
-//                CoinData(symbol = "BTCUSDT", price = "64250.50"),
-//                CoinData(symbol = "ETHUSDT", price = "3410.20"),
-//                CoinData(symbol = "BNBUSDT", price = "598.00")
-//            )
-//
-//            _state.update { currentState ->
-//                currentState.copy(isLoading = false, coins = fakeData)
-//            }
-//        }
-//    }
     private fun loadMarketData() {
         viewModelScope.launch {
             _state.update { currentState ->
@@ -91,21 +79,56 @@ class MarketViewModel : ViewModel() {
         }
     }
 
-    private fun fetchCoin() {
-        //fetch all specific coin data
+    private fun fetchCoinHistory(symbol: String, intervalLabel: String) {
         viewModelScope.launch {
-            _state.update { currentState ->
-                currentState.copy(isLoading = true, error = null)
-            }
+            _state.update { it.copy(
+                selectedCoin = symbol,
+                selectedInterval = intervalLabel,
+                isHistoryLoading = true,
+                historicalData = emptyList(),
+                priceChangePercent = null
+            ) }
 
-            try{
+            try {
+                val (apiInterval, apiLimit) = when (intervalLabel) {
+                    //Change possibility to choose interval mapping (point every x hours)
+                    "24h" -> Pair("1h", 24)
+                    "1W" -> Pair("4h", 42)
+                    "1M" -> Pair("1d", 30)
+                    else -> Pair("1h", 24)
+                }
 
-            }
-            catch (e: Exception){
+                val response = RetrofitClient.api.getCoinHistory(
+                    symbol = symbol,
+                    interval = apiInterval,
+                    limit = apiLimit
+                )
 
+                val chartPoints = response.mapIndexed { index, klineData ->
+                    val closePrice = klineData[4].toFloat()
+                    Pair(index.toFloat(), closePrice)
+                }
+
+                var percentChange: Float? = null
+                if (response.isNotEmpty()) {
+                    val firstPrice = response.first()[1].toFloat()
+                    val lastPrice = response.last()[4].toFloat()
+                    if (firstPrice > 0) {
+                        percentChange = ((lastPrice - firstPrice) / firstPrice) * 100
+                    }
+                }
+
+                _state.update { it.copy(
+                    isHistoryLoading = false,
+                    historicalData = chartPoints,
+                    priceChangePercent = percentChange
+                ) }
+
+            } catch (e: Exception) {
+                _state.update { it.copy(isHistoryLoading = false) }
+                Log.e("MarketViewModel", "Błąd historii: ${e.message}")
             }
         }
-
-        //coin state??
     }
 }
+
