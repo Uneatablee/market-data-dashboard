@@ -26,7 +26,12 @@ class MarketViewModel : ViewModel() {
         when (intent) {
             is MarketIntent.FetchMarketData -> loadMarketData()
             is MarketIntent.RefreshData -> loadMarketData()
-            is MarketIntent.CoinClicked -> fetchCoinHistory(intent.symbolString)
+            is MarketIntent.ChangeChartInterval -> {
+                _state.value.selectedCoin?.let { symbol ->
+                    fetchCoinHistory(symbol, intent.interval)
+                }
+            }
+            is MarketIntent.CoinClicked -> fetchCoinHistory(intent.symbolString, "24h")
             is MarketIntent.GoBack -> _state.update { it.copy(selectedCoin = null) }
         }
     }
@@ -74,34 +79,53 @@ class MarketViewModel : ViewModel() {
         }
     }
 
-    private fun fetchCoinHistory(symbol: String) {
+    private fun fetchCoinHistory(symbol: String, intervalLabel: String) {
         viewModelScope.launch {
-            _state.update { currentState ->
-                currentState.copy(
-                    selectedCoin = symbol,
-                    isHistoryLoading = true,
-                    historicalData = emptyList()
-                )
-            }
+            _state.update { it.copy(
+                selectedCoin = symbol,
+                selectedInterval = intervalLabel,
+                isHistoryLoading = true,
+                historicalData = emptyList(),
+                priceChangePercent = null
+            ) }
 
             try {
-                val response = RetrofitClient.api.getCoinHistory(symbol = symbol)
+                val (apiInterval, apiLimit) = when (intervalLabel) {
+                    //Change possibility to choose interval mapping (point every x hours)
+                    "24h" -> Pair("1h", 24)
+                    "1W" -> Pair("4h", 42)
+                    "1M" -> Pair("1d", 30)
+                    else -> Pair("1h", 24)
+                }
+
+                val response = RetrofitClient.api.getCoinHistory(
+                    symbol = symbol,
+                    interval = apiInterval,
+                    limit = apiLimit
+                )
 
                 val chartPoints = response.mapIndexed { index, klineData ->
                     val closePrice = klineData[4].toFloat()
                     Pair(index.toFloat(), closePrice)
                 }
 
-                _state.update { currentState ->
-                    currentState.copy(
-                        isHistoryLoading = false,
-                        historicalData = chartPoints
-                    )
+                var percentChange: Float? = null
+                if (response.isNotEmpty()) {
+                    val firstPrice = response.first()[1].toFloat()
+                    val lastPrice = response.last()[4].toFloat()
+                    if (firstPrice > 0) {
+                        percentChange = ((lastPrice - firstPrice) / firstPrice) * 100
+                    }
                 }
+
+                _state.update { it.copy(
+                    isHistoryLoading = false,
+                    historicalData = chartPoints,
+                    priceChangePercent = percentChange
+                ) }
+
             } catch (e: Exception) {
-                _state.update { currentState ->
-                    currentState.copy(isHistoryLoading = false)
-                }
+                _state.update { it.copy(isHistoryLoading = false) }
                 Log.e("MarketViewModel", "Błąd historii: ${e.message}")
             }
         }

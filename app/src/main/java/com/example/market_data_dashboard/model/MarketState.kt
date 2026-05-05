@@ -8,6 +8,10 @@ data class MarketState(
     //coin selected and corespondent chart loading
     val selectedCoin: String? = null,
     val isHistoryLoading: Boolean = false,
-    val historicalData: List<Pair<Float, Float>> = emptyList()
+    val historicalData: List<Pair<Float, Float>> = emptyList(),
+
+    //Currently chosen interval buttons
+    val selectedInterval: String = "24h",
+    val priceChangePercent: Float? = null
 )
 
