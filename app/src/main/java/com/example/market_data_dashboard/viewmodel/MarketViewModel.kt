@@ -1,5 +1,6 @@
 package com.example.market_data_dashboard.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
@@ -25,29 +26,11 @@ class MarketViewModel : ViewModel() {
         when (intent) {
             is MarketIntent.FetchMarketData -> loadMarketData()
             is MarketIntent.RefreshData -> loadMarketData()
-            is MarketIntent.CoinClicked -> fetchCoin()
+            is MarketIntent.CoinClicked -> fetchCoinHistory(intent.symbolString)
+            is MarketIntent.GoBack -> _state.update { it.copy(selectedCoin = null) }
         }
     }
 
-    //    private fun loadMarketData() {
-//        viewModelScope.launch {
-//            _state.update { currentState ->
-//                currentState.copy(isLoading = true, error = null)
-//            }
-//
-//            delay(1500)
-//
-//            val fakeData = listOf(
-//                CoinData(symbol = "BTCUSDT", price = "64250.50"),
-//                CoinData(symbol = "ETHUSDT", price = "3410.20"),
-//                CoinData(symbol = "BNBUSDT", price = "598.00")
-//            )
-//
-//            _state.update { currentState ->
-//                currentState.copy(isLoading = false, coins = fakeData)
-//            }
-//        }
-//    }
     private fun loadMarketData() {
         viewModelScope.launch {
             _state.update { currentState ->
@@ -91,21 +74,37 @@ class MarketViewModel : ViewModel() {
         }
     }
 
-    private fun fetchCoin() {
-        //fetch all specific coin data
+    private fun fetchCoinHistory(symbol: String) {
         viewModelScope.launch {
             _state.update { currentState ->
-                currentState.copy(isLoading = true, error = null)
+                currentState.copy(
+                    selectedCoin = symbol,
+                    isHistoryLoading = true,
+                    historicalData = emptyList()
+                )
             }
 
-            try{
+            try {
+                val response = RetrofitClient.api.getCoinHistory(symbol = symbol)
 
-            }
-            catch (e: Exception){
+                val chartPoints = response.mapIndexed { index, klineData ->
+                    val closePrice = klineData[4].toFloat()
+                    Pair(index.toFloat(), closePrice)
+                }
 
+                _state.update { currentState ->
+                    currentState.copy(
+                        isHistoryLoading = false,
+                        historicalData = chartPoints
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(isHistoryLoading = false)
+                }
+                Log.e("MarketViewModel", "Błąd historii: ${e.message}")
             }
         }
-
-        //coin state??
     }
 }
+

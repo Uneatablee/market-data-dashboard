@@ -7,4 +7,5 @@ sealed class MarketIntent {
     data class CoinClicked(
         val symbolString: String
     ) : MarketIntent()
+    object GoBack : MarketIntent()
 }
